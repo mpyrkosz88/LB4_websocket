@@ -1,76 +1,66 @@
-# loopback4-example-websocket
+# websocket_lb4
 
-This example is created to explore how to expose Websocket [(socket.io)](https://socket.io) endpoints
-in conjunction with LoopBack controllers.
+This application is generated using [LoopBack 4 CLI](https://loopback.io/doc/en/lb4/Command-line-interface.html) with the
+[initial project layout](https://loopback.io/doc/en/lb4/Loopback-application-layout.html).
 
-Similarly as @loopback/rest, each websocket server is attached to an http/https
-server. WebSocket controllers are mapped to different routes (namespaces), for
-example:
+Websocket application based on Loopback4 with extended RestApplication.
+Based on the newest packages of SocketIo ("4.6.1") and Loopback 4 ("4.0.2")
 
-/admins -> AdminController
-/chats -> ChatController
+Package developed by LB4 from @loopback/socketio is not used - it not extends RestApplication.
 
-When a client connects to the endpoint, a controller is instantiated upon the
-`connection` event of the namespace with the `socket` object. Controller methods
-can subscribe to one or more message types and send messages to one or more clients.
+Its custom solution based on @loopback/socketio.
 
-Each `socket` can join/leave rooms. Rooms are used to group/tag clients for messaging purposes.
+## Install dependencies
 
-Middleware can be registered at global and namespace level.
+By default, dependencies were installed when this application was generated.
+Whenever dependencies in `package.json` are changed, run the following command:
 
-## Basic use
-
+```sh
+npm install
 ```
+
+To only install resolved dependencies in `package-lock.json`:
+
+```sh
+npm ci
+```
+
+## Run the application
+
+```sh
 npm start
-Open your browser to http://localhost:3000
 ```
 
-## Websocket controllers
+Open http://127.0.0.1.4001/chats to connect to Websocket Server
+Open http://127.0.0.1:4000 in your browser.
 
-```ts
-import {Socket} from 'socket.io';
-import {ws} from '../decorators/websocket.decorator';
+## Rebuild the project
 
-/**
- * A demo controller for websocket
- */
-@ws('/chats')
-export class WebSocketController {
-  constructor(
-    @ws.socket() // Equivalent to `@inject('ws.socket')`
-    private socket: Socket,
-  ) {}
+To incrementally build the project:
 
-  /**
-   * The method is invoked when a client connects to the server
-   * @param socket
-   */
-  @ws.connect()
-  connect(socket: Socket) {
-    console.log('Client connected: %s', this.socket.id);
-    socket.join('room 1');
-  }
-
-  /**
-   * Register a handler for 'chat message' events
-   * @param msg
-   */
-  @ws.subscribe('chat message')
-  // @ws.emit('namespace' | 'requestor' | 'broadcast')
-  handleChatMessage(msg: unknown) {
-    console.log('Message: %s', msg);
-    this.socket.nsp.emit('chat message', `[${this.socket.id}] ${msg}`);
-  }
-
-  /**
-   * The method is invoked when a client disconnects from the server
-   * @param socket
-   */
-  @ws.disconnect()
-  disconnect() {
-    console.log('Client disconnected: %s', this.socket.id);
-  }
-}
+```sh
+npm run build
 ```
 
-[![LoopBack](<https://github.com/strongloop/loopback-next/raw/master/docs/site/imgs/branding/Powered-by-LoopBack-Badge-(blue)-@2x.png>)](http://loopback.io/)
+To force a full build by cleaning up cached artifacts:
+
+```sh
+npm run rebuild
+```
+
+## Fix code style and formatting issues
+
+```sh
+npm run lint
+```
+
+To automatically fix such issues:
+
+```sh
+npm run lint:fix
+```
+
+## Other useful commands
+
+- `npm run migrate`: Migrate database schemas for models
+- `npm run openapi-spec`: Generate OpenAPI spec into a file

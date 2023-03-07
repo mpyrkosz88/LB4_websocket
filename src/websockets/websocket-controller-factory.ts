@@ -1,10 +1,4 @@
-import {
-  BindingScope,
-  Constructor,
-  Context,
-  invokeMethod,
-  MetadataInspector,
-} from '@loopback/context';
+import {BindingScope, Constructor, Context, invokeMethod, MetadataInspector} from '@loopback/context';
 import {Socket} from 'socket.io';
 
 /* eslint-disable @typescript-eslint/no-misused-promises */
@@ -36,28 +30,31 @@ export class WebSocketControllerFactory {
       MetadataInspector.getAllMethodMetadata(
         'websocket:connect',
         this.controllerClass.prototype,
-      ) || {};
+      ) ?? {};
     for (const m in connectMethods) {
       await invokeMethod(this.controller, m, this.ctx, [socket]);
     }
   }
 
   registerSubscribeMethods(socket: Socket) {
-    const regexpEventHandlers = new Map<
-      RegExp[],
-      (...args: unknown[]) => Promise<void>
-    >();
+    const regexpEventHandlers = new Map<RegExp[],
+      (...args: unknown[]) => Promise<void>>();
     const subscribeMethods =
       MetadataInspector.getAllMethodMetadata<(string | RegExp)[]>(
         'websocket:subscribe',
         this.controllerClass.prototype,
-      ) || {};
+      ) ?? {};
     for (const m in subscribeMethods) {
       for (const t of subscribeMethods[m]) {
         const regexps: RegExp[] = [];
         if (typeof t === 'string') {
           socket.on(t, async (...args: unknown[]) => {
-            await invokeMethod(this.controller, m, this.ctx, args);
+            let done: Function = (result: unknown) => null;
+            if (typeof args[args.length - 1] === 'function') {
+              done = args.pop() as Function;
+            }
+            const result = await invokeMethod(this.controller, m, this.ctx, args);
+            done(result);
           });
         } else if (t instanceof RegExp) {
           regexps.push(t);

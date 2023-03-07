@@ -1,24 +1,26 @@
 import {Socket} from 'socket.io';
-import {ws} from '../decorators/websocket.decorator';
+import {ws} from '../websockets/decorators/websocket.decorator';
 
 /**
  * A demo controller for websocket
  */
-@ws('/chats')
-export class WebSocketController {
+@ws({name: 'chatNsp', namespace: /^\/chats\/\d+$/})
+export class ChatControllerWs {
   constructor(
     @ws.socket() // Equivalent to `@inject('ws.socket')`
     private socket: Socket,
-  ) {}
+  ) { }
 
   /**
    * The method is invoked when a client connects to the server
    * @param socket
    */
   @ws.connect()
-  connect(socket: Socket) {
+  async connect(socket: Socket) {
     console.log('Client connected: %s', this.socket.id);
-    socket.join('room 1');
+    await socket.join('room 1');
+    // Room notification of request /todos/room/example/emit (TodoController)
+    await socket.join('some room');
   }
 
   /**

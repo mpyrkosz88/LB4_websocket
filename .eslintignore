@@ -1,5 +1,4 @@
 node_modules/
 dist/
 coverage/
-api-docs/
-**/*.d.ts
+.eslintrc.js

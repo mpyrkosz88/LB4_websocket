@@ -1,9 +1,8 @@
 import {Constructor, Context} from '@loopback/context';
 import {HttpServer} from '@loopback/http-server';
 import {Server, ServerOptions, Socket} from 'socket.io';
-import {getWebSocketMetadata} from './decorators/websocket.decorator';
+import {getWebSocketMetadata, WebSocketMetadata} from "./decorators/websocket.decorator";
 import {WebSocketControllerFactory} from './websocket-controller-factory';
-import SocketIOServer = require('socket.io');
 
 const debug = require('debug')('loopback:websocket');
 
@@ -20,11 +19,13 @@ export class WebSocketServer extends Context {
   private io: Server;
 
   constructor(
+    public ctx: Context,
     public readonly httpServer: HttpServer,
-    private options: ServerOptions = {},
+    private options?: ServerOptions,
   ) {
-    super();
-    this.io = SocketIOServer(options);
+    super(ctx);
+    this.io = new Server(options);
+    ctx.bind('ws.server').to(this.io);
   }
 
   /**
@@ -38,17 +39,25 @@ export class WebSocketServer extends Context {
   /**
    * Register a websocket controller
    * @param ControllerClass
-   * @param namespace
+   * @param meta
    */
-  route(ControllerClass: Constructor<any>, namespace?: string | RegExp) {
-    if (namespace == null) {
-      const meta = getWebSocketMetadata(ControllerClass);
-      namespace = meta && meta.namespace;
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  route(ControllerClass: Constructor<any>, meta?: WebSocketMetadata | string | RegExp) {
+    if (meta instanceof RegExp || typeof meta === 'string') {
+      meta = {namespace: meta} as WebSocketMetadata;
+    }
+    if (meta == null) {
+      meta = getWebSocketMetadata(ControllerClass) as WebSocketMetadata;
+    }
+    const nsp = (meta?.namespace) ? this.io.of(meta.namespace) : this.io;
+    if (meta?.name) {
+      this.ctx.bind(`ws.namespace.${meta.name}`).to(nsp);
     }
 
-    const nsp = namespace ? this.io.of(namespace) : this.io;
     /* eslint-disable @typescript-eslint/no-misused-promises */
     nsp.on('connection', async socket => {
+      console.log('connection', 'connection');
       debug(
         'Websocket connected: id=%s namespace=%s',
         socket.id,
@@ -71,7 +80,6 @@ export class WebSocketServer extends Context {
    */
   async start() {
     await this.httpServer.start();
-    // FIXME: Access HttpServer.server
     const server = (this.httpServer as any).server;
     this.io.attach(server, this.options);
   }

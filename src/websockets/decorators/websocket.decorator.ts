@@ -1,20 +1,19 @@
 import {
   ClassDecoratorFactory,
   Constructor,
+  inject,
   MetadataAccessor,
   MetadataInspector,
   MethodDecoratorFactory,
-  inject,
 } from '@loopback/context';
 
 export interface WebSocketMetadata {
+  name?: string,
   namespace?: string | RegExp;
 }
 
-export const WEBSOCKET_METADATA = MetadataAccessor.create<
-  WebSocketMetadata,
-  ClassDecorator
->('websocket');
+export const WEBSOCKET_METADATA = MetadataAccessor.create<WebSocketMetadata,
+  ClassDecorator>('websocket');
 
 /**
  * Decorate a websocket controller class to specify the namespace
@@ -27,7 +26,7 @@ export const WEBSOCKET_METADATA = MetadataAccessor.create<
  */
 export function ws(spec: WebSocketMetadata | string | RegExp = {}) {
   if (typeof spec === 'string' || spec instanceof RegExp) {
-    spec = {namespace: spec};
+    spec = { namespace: spec };
   }
   return ClassDecoratorFactory.createDecorator(WEBSOCKET_METADATA, spec);
 }
@@ -42,6 +41,14 @@ export function getWebSocketMetadata(controllerClass: Constructor<unknown>) {
 export namespace ws {
   export function socket() {
     return inject('ws.socket');
+  }
+
+  export function server() {
+    return inject('ws.server');
+  }
+
+  export function namespace(name: string) {
+    return inject(`ws.namespace.${name}`);
   }
 
   /**
