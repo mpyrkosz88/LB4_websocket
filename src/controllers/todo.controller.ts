@@ -10,7 +10,7 @@ import { del, get, getModelSchemaRef, HttpErrors, param, patch, post, put, reque
 import { Todo } from '../models';
 import { TodoRepository } from '../repositories';
 import { Geocoder } from '../services';
-import { ws } from "../websockets/decorators/websocket.decorator";
+import { ws } from "../websocket/decorators/websocket.decorator";
 
 export class TodoController {
     constructor(

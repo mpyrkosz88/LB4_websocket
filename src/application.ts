@@ -3,17 +3,17 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
-import {BootMixin} from '@loopback/boot';
-import {ApplicationConfig} from '@loopback/core';
-import {RepositoryMixin} from '@loopback/repository';
-import {RestExplorerComponent} from '@loopback/rest-explorer';
-import {ServiceMixin} from '@loopback/service-proxy';
+import { BootMixin } from '@loopback/boot';
+import { ApplicationConfig } from '@loopback/core';
+import { RepositoryMixin } from '@loopback/repository';
+import { RestExplorerComponent } from '@loopback/rest-explorer';
+import { ServiceMixin } from '@loopback/service-proxy';
 import path from 'path';
-import {MySequence} from './sequence';
-import {WebsocketApplication} from "./websockets/websocket.application";
-import {WebsocketControllerBooter} from "./websockets/websocket.booter";
+import { MySequence } from './sequence';
+import { WebsocketApplication } from "./websocket/websocket.application";
+import { WebsocketControllerBooter } from "./websocket/websocket.booter";
 
-export {ApplicationConfig};
+export { ApplicationConfig };
 
 export class TodoListApplication extends BootMixin(
   ServiceMixin(RepositoryMixin(WebsocketApplication)),
