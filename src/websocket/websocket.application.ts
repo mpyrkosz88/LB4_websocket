@@ -1,11 +1,11 @@
-import {Constructor} from "@loopback/context";
-import {ApplicationConfig} from '@loopback/core';
-import {HttpServer} from '@loopback/http-server';
-import {RestApplication} from '@loopback/rest';
-import {Namespace} from "socket.io";
-import {WebSocketServer} from "./websocket.server";
+import { Constructor } from "@loopback/context";
+import { ApplicationConfig } from '@loopback/core';
+import { HttpServer } from '@loopback/http-server';
+import { RestApplication } from '@loopback/rest';
+import { Namespace } from "socket.io";
+import { WebSocketServer } from "./websocket.server";
 
-export {ApplicationConfig};
+export { ApplicationConfig };
 
 export class WebsocketApplication extends RestApplication {
   readonly httpServer: HttpServer;
@@ -13,7 +13,7 @@ export class WebsocketApplication extends RestApplication {
 
   constructor(options: ApplicationConfig = {}) {
     super(options);
-    this.httpServer = new HttpServer(this.requestHandler, options.websocket);
+    this.httpServer = new HttpServer(this.requestHandler, options.rest);
     this.wsServer = new WebSocketServer(this, this.httpServer);
   }
 
@@ -24,11 +24,9 @@ export class WebsocketApplication extends RestApplication {
 
   public async start(): Promise<void> {
     await this.wsServer.start();
-    await super.start();
   }
 
   public async stop(): Promise<void> {
     await this.wsServer.stop();
-    await super.stop();
   }
 }
