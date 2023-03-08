@@ -1,21 +1,13 @@
-// Copyright IBM Corp. 2018,2020. All Rights Reserved.
-// Node module: @loopback/example-todo
-// This file is licensed under the MIT License.
-// License text available at https://opensource.org/licenses/MIT
-
-import { inject } from '@loopback/core';
-import { Filter, repository } from '@loopback/repository';
+import { repository } from '@loopback/repository';
 import { Server } from 'socket.io';
-import { del, get, getModelSchemaRef, HttpErrors, param, patch, post, put, requestBody, } from '@loopback/rest';
+import { del, get, getModelSchemaRef, param, patch, post, put, requestBody, } from '@loopback/rest';
 import { Todo } from '../models';
 import { TodoRepository } from '../repositories';
-import { Geocoder } from '../services';
 import { ws } from "../websocket/decorators/websocket.decorator";
 
 export class TodoController {
     constructor(
         @repository(TodoRepository) protected todoRepository: TodoRepository,
-        @inject('services.Geocoder') protected geoService: Geocoder,
     ) {
     }
 
@@ -37,20 +29,6 @@ export class TodoController {
         })
         todo: Omit<Todo, 'id'>,
     ): Promise<Todo> {
-        if (todo.remindAtAddress) {
-            const geo = await this.geoService.geocode(todo.remindAtAddress);
-
-            if (!geo[0]) {
-                // address not found
-                throw new HttpErrors.BadRequest(
-                    `Address not found: ${todo.remindAtAddress}`,
-                );
-            }
-            // Encode the coordinates as "lat,lng" (Google Maps API format). See also
-            // https://stackoverflow.com/q/7309121/69868
-            // https://gis.stackexchange.com/q/7379
-            todo.remindAtGeo = `${geo[0].y},${geo[0].x}`;
-        }
         return this.todoRepository.create(todo);
     }
 
@@ -82,10 +60,8 @@ export class TodoController {
         },
     })
     async findTodos(
-        @param.filter(Todo)
-        filter?: Filter<Todo>,
     ): Promise<Todo[]> {
-        return this.todoRepository.find(filter);
+        return this.todoRepository.find();
     }
 
     @put('/todos/{id}', {
@@ -139,7 +115,7 @@ export class TodoController {
     @post('/todos/room/example/emit')
     async exampleRoomEmmit(
         @ws.namespace('chatNsp') nsp: Server
-    ): Promise<any> {
+    ): Promise<unknown> {
         nsp.to('some room').emit('some room event', `time: ${new Date().getTime()}`);
         console.log('exampleRoomEmmit');
         return 'room event emitted';
