@@ -31,7 +31,6 @@ npm ci
 npm start
 ```
 
-Open http://127.0.0.1.4001/chats to connect to Websocket Server
 Open http://127.0.0.1:4000 in your browser.
 
 ## Rebuild the project
