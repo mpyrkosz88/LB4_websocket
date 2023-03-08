@@ -1,7 +1,7 @@
-// Copyright IBM Corp. 2018,2020. All Rights Reserved.
-// Node module: @loopback/example-todo
-// This file is licensed under the MIT License.
-// License text available at https://opensource.org/licenses/MIT
+export * from '@loopback/rest';
+export * from './application';
+export * from './models';
+export * from './repositories';
 
 import { ApplicationConfig, TodoListApplication } from './application';
 
@@ -10,7 +10,7 @@ export async function main(options: ApplicationConfig = {}) {
   await app.boot();
   await app.start();
 
-  const url = app.httpServer.url;
+  const url = app.restServer.url;
   console.log(`Server is running at ${url}`);
   return app;
 }
@@ -33,10 +33,3 @@ if (require.main === module) {
     process.exit(1);
   });
 }
-
-// re-exports for our benchmark, not needed for the tutorial itself
-export * from '@loopback/rest';
-export * from './application';
-export * from './models';
-export * from './repositories';
-

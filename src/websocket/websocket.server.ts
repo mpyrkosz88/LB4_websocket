@@ -1,8 +1,8 @@
-import {Constructor, Context} from '@loopback/context';
-import {HttpServer} from '@loopback/http-server';
-import {Server, ServerOptions, Socket} from 'socket.io';
-import {getWebSocketMetadata, WebSocketMetadata} from "./decorators/websocket.decorator";
-import {WebSocketControllerFactory} from './websocket-controller-factory';
+import { Constructor, Context } from '@loopback/context';
+import { RestServer } from '@loopback/rest';
+import { Server, ServerOptions, Socket } from 'socket.io';
+import { getWebSocketMetadata, WebSocketMetadata } from "./decorators/websocket.decorator";
+import { WebSocketControllerFactory } from './websocket-controller-factory';
 
 const debug = require('debug')('loopback:websocket');
 
@@ -20,7 +20,7 @@ export class WebSocketServer extends Context {
 
   constructor(
     public ctx: Context,
-    public readonly httpServer: HttpServer,
+    public readonly restServer: RestServer,
     private options?: ServerOptions,
   ) {
     super(ctx);
@@ -45,7 +45,7 @@ export class WebSocketServer extends Context {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   route(ControllerClass: Constructor<any>, meta?: WebSocketMetadata | string | RegExp) {
     if (meta instanceof RegExp || typeof meta === 'string') {
-      meta = {namespace: meta} as WebSocketMetadata;
+      meta = { namespace: meta } as WebSocketMetadata;
     }
     if (meta == null) {
       meta = getWebSocketMetadata(ControllerClass) as WebSocketMetadata;
@@ -79,9 +79,9 @@ export class WebSocketServer extends Context {
    * Start the websocket server
    */
   async start() {
-    await this.httpServer.start();
-    const server = (this.httpServer as any).server;
-    this.io.attach(server, this.options);
+    await this.restServer.start();
+    const appServer = this.restServer?.httpServer?.server as any
+    this.io.attach(appServer, this.options);
   }
 
   /**
@@ -94,6 +94,6 @@ export class WebSocketServer extends Context {
       });
     });
     await close;
-    await this.httpServer.stop();
+    await this.restServer.stop();
   }
 }

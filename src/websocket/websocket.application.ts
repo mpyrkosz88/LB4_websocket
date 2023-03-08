@@ -1,6 +1,5 @@
 import { Constructor } from "@loopback/context";
 import { ApplicationConfig } from '@loopback/core';
-import { HttpServer } from '@loopback/http-server';
 import { RestApplication } from '@loopback/rest';
 import { Namespace } from "socket.io";
 import { WebSocketServer } from "./websocket.server";
@@ -8,13 +7,11 @@ import { WebSocketServer } from "./websocket.server";
 export { ApplicationConfig };
 
 export class WebsocketApplication extends RestApplication {
-  readonly httpServer: HttpServer;
   readonly wsServer: WebSocketServer;
 
   constructor(options: ApplicationConfig = {}) {
     super(options);
-    this.httpServer = new HttpServer(this.requestHandler, options.rest);
-    this.wsServer = new WebSocketServer(this, this.httpServer);
+    this.wsServer = new WebSocketServer(this, this.restServer);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
